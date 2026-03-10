@@ -6,56 +6,43 @@
 //
 
 import SwiftUI
-import SwiftData
 
 struct ContentView: View {
-    @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Item]
+    @State private var routeManager = RouteManager()
+    @State private var healthKitManager = HealthKitManager()
+    @State private var stepMonitor: StepMonitor
+
+    init() {
+        let manager = RouteManager()
+        let health = HealthKitManager()
+        _routeManager = State(initialValue: manager)
+        _healthKitManager = State(initialValue: health)
+        _stepMonitor = State(initialValue: StepMonitor(routeManager: manager, healthKitManager: health))
+    }
 
     var body: some View {
-        NavigationSplitView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
-                    } label: {
-                        Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
-                    }
+        TabView {
+            MainRouteView(routeManager: routeManager, stepMonitor: stepMonitor)
+                .tabItem {
+                    Label("Main Route", systemImage: "star.fill")
                 }
-                .onDelete(perform: deleteItems)
-            }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
-                }
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
-                    }
-                }
-            }
-        } detail: {
-            Text("Select an item")
-        }
-    }
 
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(timestamp: Date())
-            modelContext.insert(newItem)
-        }
-    }
+            SavedRoutesView(routeManager: routeManager, healthKitManager: healthKitManager)
+                .tabItem {
+                    Label("Routes", systemImage: "list.bullet")
+                }
 
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                modelContext.delete(items[index])
-            }
+            StepHistoryView()
+                .tabItem {
+                    Label("Steps", systemImage: "figure.walk")
+                }
+        }
+        .task {
+            await stepMonitor.startMonitoring()
         }
     }
 }
 
 #Preview {
     ContentView()
-        .modelContainer(for: Item.self, inMemory: true)
 }
