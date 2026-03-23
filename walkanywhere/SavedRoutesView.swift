@@ -13,7 +13,7 @@ struct SavedRoutesView: View {
   @State private var showingMapSheet = false
 
   var body: some View {
-    NavigationStack {
+    ZStack(alignment: .top) {
       List {
         if routeManager.savedRoutes.isEmpty {
           ContentUnavailableView(
@@ -119,21 +119,27 @@ struct SavedRoutesView: View {
           .onDelete(perform: deleteRoutes)
         }
       }
-      .navigationTitle("My Routes")
-      .navigationBarTitleDisplayMode(.inline)
-      .toolbar {
-        ToolbarItem(placement: .topBarTrailing) {
-          Button {
-            showingMapSheet = true
-          } label: {
-            Image(systemName: "plus")
-          }
-        }
-      }
+      .listStyle(.plain)
+      .contentMargins(.top, 100)
       .sheet(isPresented: $showingMapSheet) {
-        MapDistanceView(routeManager: routeManager)
+        MapDistanceView(routeManager: routeManager, onRouteSaved: {
+          showingMapSheet = false
+        })
       }
+
+      // Glassy navigation title at the top
+      HStack {
+        GlassyNavigationTitle(title: "My Routes")
+        Spacer()
+        GlassyButton(systemImage: "plus", action: {
+          showingMapSheet = true
+        })
+        .padding(.trailing, 20)
+      }
+      .padding(.top, 60)
+      .padding(.leading, 20)
     }
+    .ignoresSafeArea(edges: .top)
   }
 
   private func deleteRoutes(at offsets: IndexSet) {

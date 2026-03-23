@@ -15,43 +15,32 @@ struct MainRouteView: View {
   @State private var showingDebugMenu = false
 
   var body: some View {
-    NavigationStack {
-      Group {
-        if let mainRoute = routeManager.mainRoute {
+    ZStack(alignment: .top) {
+      if let mainRoute = routeManager.mainRoute {
+        GeometryReader { geometry in
           ZStack(alignment: .bottom) {
-          Map(position: $position, interactionModes: [.pan, .zoom]) {
-            Annotation("Start", coordinate: mainRoute.startCoordinate) {
-              MapMarker(label: "A", color: .green)
+            Map(position: $position, interactionModes: [.pan, .zoom]) {
+              Annotation("Start", coordinate: mainRoute.startCoordinate) {
+                MapMarker(label: "A", color: .green)
+              }
+
+              Annotation("End", coordinate: mainRoute.endCoordinate) {
+                MapMarker(label: "B", color: .red)
+              }
+
+              MapPolyline(mainRoute.createPolyline())
+                .stroke(.blue, lineWidth: 4)
+            }
+            .mapStyle(.standard)
+            .onAppear {
+              setupMapPosition(for: mainRoute)
             }
 
-            Annotation("End", coordinate: mainRoute.endCoordinate) {
-              MapMarker(label: "B", color: .red)
-            }
-
-            MapPolyline(mainRoute.createPolyline())
-              .stroke(.blue, lineWidth: 4)
+            RouteInfoCard(
+              route: mainRoute,
+              progress: routeManager.getStepsProgress(for: mainRoute.id, currentSteps: stepMonitor.todaySteps)
+            )
           }
-          .mapStyle(.standard)
-          .onAppear {
-            setupMapPosition(for: mainRoute)
-          }
-
-          RouteInfoCard(
-            route: mainRoute,
-            progress: routeManager.getStepsProgress(for: mainRoute.id, currentSteps: stepMonitor.todaySteps)
-          )
-        }
-        .toolbar {
-          #if DEBUG
-          ToolbarItem(placement: .topBarTrailing) {
-            Button {
-              showingDebugMenu = true
-            } label: {
-              Image(systemName: "ladybug.fill")
-                .foregroundStyle(.red)
-            }
-          }
-          #endif
         }
         .sheet(isPresented: $showingDebugMenu) {
           DebugMenuSheet(
@@ -60,17 +49,29 @@ struct MainRouteView: View {
             stepMonitor: stepMonitor
           )
         }
-        } else {
-          ContentUnavailableView(
-            "No Main Route Selected",
-            systemImage: "star.slash",
-            description: Text("Go to Routes and tap the star next to a route to set it as your main route.")
-          )
-        }
+      } else {
+        ContentUnavailableView(
+          "No Main Route Selected",
+          systemImage: "star.slash",
+          description: Text("Go to Routes and tap the star next to a route to set it as your main route.")
+        )
       }
-      .navigationTitle("Current Journey")
-      .navigationBarTitleDisplayMode(.inline)
+
+      // Glassy navigation title at the top
+      HStack {
+        GlassyNavigationTitle(title: "Current Journey")
+        Spacer()
+        #if DEBUG
+        GlassyButton(systemImage: "ladybug.fill", action: {
+          showingDebugMenu = true
+        }, tintColor: .red)
+        .padding(.trailing, 20)
+        #endif
+      }
+      .padding(.top, 60)
+      .padding(.leading, 20)
     }
+    .ignoresSafeArea()
   }
 
   private func setupMapPosition(for route: SavedRoute) {

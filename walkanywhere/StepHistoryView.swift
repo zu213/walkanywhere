@@ -11,7 +11,7 @@ struct StepHistoryView: View {
   @State private var healthKitManager = HealthKitManager()
 
   var body: some View {
-    NavigationStack {
+    ZStack(alignment: .top) {
       List {
         Section {
           VStack(alignment: .leading, spacing: 8) {
@@ -63,8 +63,8 @@ struct StepHistoryView: View {
           }
         }
       }
-      .navigationTitle("Step History")
-      .navigationBarTitleDisplayMode(.inline)
+      .listStyle(.plain)
+      .contentMargins(.top, 100)
       .task {
         if healthKitManager.isAuthorized {
           await healthKitManager.fetchTodaySteps()
@@ -75,7 +75,14 @@ struct StepHistoryView: View {
         await healthKitManager.fetchTodaySteps()
         await healthKitManager.fetchStepHistory(days: 30)
       }
+
+      // Glassy navigation title at the top
+      GlassyNavigationTitle(title: "Step History")
+        .padding(.top, 60)
+        .padding(.leading, 20)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
+    .ignoresSafeArea(edges: .top)
   }
 }
 

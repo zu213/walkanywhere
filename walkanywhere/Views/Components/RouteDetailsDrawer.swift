@@ -109,6 +109,7 @@ struct RouteDetailsDrawer: View {
     .background(.regularMaterial)
     .clipShape(RoundedRectangle(cornerRadius: 16))
     .padding()
+    .padding(.bottom, 80)
   }
 
   private func formatTime(_ seconds: TimeInterval) -> String {

@@ -24,9 +24,10 @@ struct MapDistanceView: View {
   @State private var isDrawerExpanded = true
 
   var routeManager: RouteManager
+  var onRouteSaved: (() -> Void)?
 
   var body: some View {
-    NavigationStack {
+    ZStack {
       ZStack(alignment: .bottom) {
         MapReader { proxy in
           Map(position: $position, interactionModes: .all) {
@@ -92,8 +93,6 @@ struct MapDistanceView: View {
             .padding()
         }
       }
-      .navigationTitle("Create a route")
-      .navigationBarTitleDisplayMode(.inline)
       .sheet(isPresented: $showingSaveSheet) {
         NavigationStack {
           Form {
@@ -120,7 +119,17 @@ struct MapDistanceView: View {
         }
         .presentationDetents([.medium])
       }
+
+      // Glassy navigation title at the top
+      VStack {
+        GlassyNavigationTitle(title: "Create a route")
+          .padding(.top, 60)
+          .padding(.leading, 20)
+          .frame(maxWidth: .infinity, alignment: .leading)
+        Spacer()
+      }
     }
+    .ignoresSafeArea()
   }
 
   private func setPoint(coordinate: CLLocationCoordinate2D) {
@@ -329,6 +338,9 @@ struct MapDistanceView: View {
     showingSaveSheet = false
     routeName = ""
     clearPoints()
+
+    // Close the entire map sheet after saving
+    onRouteSaved?()
   }
 
   private func clearPoints() {
@@ -341,5 +353,5 @@ struct MapDistanceView: View {
 }
 
 #Preview {
-  MapDistanceView(routeManager: RouteManager())
+  MapDistanceView(routeManager: RouteManager(), onRouteSaved: nil)
 }
