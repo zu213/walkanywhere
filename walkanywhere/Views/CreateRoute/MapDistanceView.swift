@@ -11,7 +11,7 @@ import MapKit
 struct MapDistanceView: View {
     @State private var position: MapCameraPosition = .region(MKCoordinateRegion(
         center: CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194),
-        span: MKCoordinateSpan(latitudeDelta: 0.1, longitudeDelta: 0.1)
+        span: MKCoordinateSpan(latitudeDelta: 0.5, longitudeDelta: 0.5)
     ))
     @State private var startLocation: CLLocationCoordinate2D?
     @State private var endLocation: CLLocationCoordinate2D?
@@ -21,6 +21,7 @@ struct MapDistanceView: View {
     @State private var isCalculatingRoute = false
     @State private var showingSaveSheet = false
     @State private var routeName = ""
+    @State private var isDrawerExpanded = true
 
     var routeManager: RouteManager
 
@@ -68,79 +69,31 @@ struct MapDistanceView: View {
                     }
                 }
 
-                VStack(spacing: 16) {
-                    if startLocation != nil || endLocation != nil {
-                        VStack(spacing: 8) {
-                            if startLocation != nil && endLocation != nil {
-                                if isCalculatingRoute {
-                                    ProgressView("Calculating route...")
-                                        .padding()
-                                } else {
-                                    VStack(spacing: 8) {
-                                        Text("Walking Distance")
-                                            .font(.caption)
-                                            .foregroundStyle(.secondary)
-                                        HStack(alignment: .firstTextBaseline, spacing: 4) {
-                                            Text(String(format: "%.2f", distance / 1000))
-                                                .font(.system(size: 36, weight: .bold, design: .rounded))
-                                            Text("km")
-                                                .font(.title3)
-                                                .foregroundStyle(.secondary)
-                                        }
-                                        Text(String(format: "%.0f meters", distance))
-                                            .font(.caption)
-                                            .foregroundStyle(.secondary)
-
-                                        if estimatedTime > 0 {
-                                            Divider()
-                                                .padding(.vertical, 4)
-                                            HStack(spacing: 4) {
-                                                Image(systemName: "figure.walk")
-                                                    .foregroundStyle(.secondary)
-                                                Text(formatTime(estimatedTime))
-                                                    .font(.subheadline)
-                                                    .foregroundStyle(.secondary)
-                                            }
-                                        }
-                                    }
-                                }
-                            } else {
-                                Text("Tap on the map to set \(startLocation == nil ? "start" : "end") point")
-                                    .font(.subheadline)
-                                    .foregroundStyle(.secondary)
-                            }
-
-                            HStack(spacing: 12) {
-                                if startLocation != nil && endLocation != nil && routePolyline != nil {
-                                    Button(action: {
-                                        showingSaveSheet = true
-                                    }) {
-                                        Label("Save Route", systemImage: "plus.circle.fill")
-                                    }
-                                    .buttonStyle(.borderedProminent)
-                                }
-
-                                Button("Clear Points") {
-                                    clearPoints()
-                                }
-                                .buttonStyle(.bordered)
-                            }
-                        }
+                if startLocation != nil || endLocation != nil {
+                    RouteDetailsDrawer(
+                        isExpanded: $isDrawerExpanded,
+                        startLocation: startLocation,
+                        endLocation: endLocation,
+                        distance: distance,
+                        estimatedTime: estimatedTime,
+                        isCalculatingRoute: isCalculatingRoute,
+                        routePolyline: routePolyline,
+                        onSaveRoute: {
+                            showingSaveSheet = true
+                        },
+                        onClearPoints: clearPoints
+                    )
+                } else {
+                    Text("Tap on the map to set two points")
+                        .font(.subheadline)
                         .padding()
                         .background(.regularMaterial)
                         .clipShape(RoundedRectangle(cornerRadius: 16))
                         .padding()
-                    } else {
-                        Text("Tap on the map to set two points")
-                            .font(.subheadline)
-                            .padding()
-                            .background(.regularMaterial)
-                            .clipShape(RoundedRectangle(cornerRadius: 16))
-                            .padding()
-                    }
                 }
             }
-            .navigationTitle("Walking Distance")
+            .navigationTitle("Create a route")
+            .navigationBarTitleDisplayMode(.inline)
             .sheet(isPresented: $showingSaveSheet) {
                 NavigationStack {
                     Form {
@@ -354,17 +307,6 @@ struct MapDistanceView: View {
             ))
 
             isCalculatingRoute = false
-        }
-    }
-
-    private func formatTime(_ seconds: TimeInterval) -> String {
-        let hours = Int(seconds) / 3600
-        let minutes = (Int(seconds) % 3600) / 60
-
-        if hours > 0 {
-            return "\(hours)h \(minutes)min"
-        } else {
-            return "\(minutes) min"
         }
     }
 
