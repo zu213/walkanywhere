@@ -2,7 +2,9 @@
 
 This file contains all user prompts from the development of this project.
 
-## Session 1 - Initial Development
+## Session 1 - I forgot to get Claude to do during initial creation
+
+## Session 2 - Further Development
 
 1. "On the map how do i zoom out on simulator ? and can you set the simulator to be more zoomed out by default"
 
@@ -32,4 +34,4 @@ This file contains all user prompts from the development of this project.
 
 14. "nice now can you add a glass button affect all the right bar nav buttons"
 
-15. "can you add a Prompts.md file to the route adn add all prompts i type ot it in this repo past aswwell if possible then can you add a note to the cladue.md to populate this in future for yourself."
+15. "can you add a Prompts.md file to the route and add all prompts i type ot it in this repo past aswwell if possible then can you add a note to the cladue.md to populate this in future for yourself."
