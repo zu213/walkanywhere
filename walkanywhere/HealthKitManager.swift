@@ -17,6 +17,24 @@ class HealthKitManager {
 
   private let healthStore = HKHealthStore()
 
+  func checkAuthorizationStatus() async {
+    guard HKHealthStore.isHealthDataAvailable() else {
+      return
+    }
+
+    let stepType = HKQuantityType.quantityType(forIdentifier: .stepCount)!
+    let status = healthStore.authorizationStatus(for: stepType)
+
+    await MainActor.run {
+      self.isAuthorized = (status == .sharingAuthorized)
+    }
+
+    if isAuthorized {
+      await fetchTodaySteps()
+      await fetchStepHistory(days: 30)
+    }
+  }
+
   func requestAuthorization() async {
     guard HKHealthStore.isHealthDataAvailable() else {
       authorizationError = "Health data is not available on this device"

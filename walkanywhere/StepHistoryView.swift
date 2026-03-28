@@ -66,10 +66,7 @@ struct StepHistoryView: View {
       .listStyle(.plain)
       .contentMargins(.top, 100)
       .task {
-        if healthKitManager.isAuthorized {
-          await healthKitManager.fetchTodaySteps()
-          await healthKitManager.fetchStepHistory(days: 30)
-        }
+        await healthKitManager.checkAuthorizationStatus()
       }
       .refreshable {
         await healthKitManager.fetchTodaySteps()

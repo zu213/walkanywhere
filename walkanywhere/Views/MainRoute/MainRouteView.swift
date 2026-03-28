@@ -33,12 +33,17 @@ struct MainRouteView: View {
             }
             .mapStyle(.standard)
             .onAppear {
-              setupMapPosition(for: mainRoute)
+              setupMapPosition(for: mainRoute, screenHeight: geometry.size.height)
             }
 
             RouteInfoCard(
               route: mainRoute,
-              progress: routeManager.getStepsProgress(for: mainRoute.id, currentSteps: stepMonitor.todaySteps)
+              progress: routeManager.getStepsProgress(for: mainRoute.id, currentSteps: stepMonitor.todaySteps),
+              onRecentre: {
+                withAnimation {
+                  setupMapPosition(for: mainRoute, screenHeight: geometry.size.height)
+                }
+              }
             )
           }
         }
@@ -74,20 +79,56 @@ struct MainRouteView: View {
     .ignoresSafeArea()
   }
 
-  private func setupMapPosition(for route: SavedRoute) {
+  private func setupMapPosition(for route: SavedRoute, screenHeight: CGFloat? = nil) {
     let polyline = route.createPolyline()
     let rect = polyline.boundingMapRect
-    let region = MKCoordinateRegion(rect)
+    let baseRegion = MKCoordinateRegion(rect)
 
-    let expandedRegion = MKCoordinateRegion(
-      center: region.center,
+    // Calculate UI elements heights
+    // Tab bar (~50pt) + Route card when minimized (~80pt) + some padding (20pt) = ~150pt total
+    // Top navigation (~100pt for title area)
+    let bottomUIHeight: CGFloat = 150
+    let topUIHeight: CGFloat = 100
+    let totalUIHeight = bottomUIHeight + topUIHeight
+
+    // Calculate how much to zoom out to compensate for UI elements
+    let visibleHeightRatio: Double
+    let verticalShiftRatio: Double
+
+    if let height = screenHeight {
+      // Calculate what fraction of the screen is actually available for the map
+      let availableHeight = height - totalUIHeight
+      // We need to zoom out so the route fits in the available height
+      visibleHeightRatio = Double(height / availableHeight)
+      // Shift the center to account for more UI at bottom than top
+      // Net shift is (bottomUI - topUI) / 2, then add extra 10% for more clearance
+      let netUIOffset = bottomUIHeight - topUIHeight
+      verticalShiftRatio = Double(netUIOffset / height) + 0.10
+    } else {
+      // Default values if screen height not provided
+      visibleHeightRatio = 1.4  // Zoom out by 40%
+      verticalShiftRatio = 0.15  // Shift up by 15%
+    }
+
+    // Shift the center downward (subtract from latitude) to make content appear higher on screen
+    let shiftedCenter = CLLocationCoordinate2D(
+      latitude: baseRegion.center.latitude - (baseRegion.span.latitudeDelta * verticalShiftRatio),
+      longitude: baseRegion.center.longitude
+    )
+
+    // Expand the region to account for UI elements blocking the view
+    // Plus additional 30% padding for aesthetics
+    let totalZoomFactor = visibleHeightRatio * 1.3
+
+    let adjustedRegion = MKCoordinateRegion(
+      center: shiftedCenter,
       span: MKCoordinateSpan(
-        latitudeDelta: region.span.latitudeDelta * 1.3,
-        longitudeDelta: region.span.longitudeDelta * 1.3
+        latitudeDelta: baseRegion.span.latitudeDelta * totalZoomFactor,
+        longitudeDelta: baseRegion.span.longitudeDelta * totalZoomFactor
       )
     )
 
-    position = .region(expandedRegion)
+    position = .region(adjustedRegion)
   }
 }
 

@@ -35,3 +35,19 @@ This file contains all user prompts from the development of this project.
 14. "nice now can you add a glass button affect all the right bar nav buttons"
 
 15. "can you add a Prompts.md file to the route and add all prompts i type ot it in this repo past aswwell if possible then can you add a note to the cladue.md to populate this in future for yourself."
+
+16. "Can you change the steps tab so that it doesnt ask for enable health access evrrytime only on once and then once accepted not again."
+
+17. "Can you make it sho the steps aoutoamtically shwo if i have enabled health access i can still see the button and have to clik it when the app is closed and launched again."
+
+18. "Can you add a minimise button for the main route page gray route popup ?"
+
+19. "can you adda  button on the route card that recentres the main route please"
+
+20. "As I have lots of stuff at the bottom can you accoutn for the recentering / zooming so that the end of the route is atleast above the tabbar and minimised route card"
+
+21. "Ah for my example that didn't work I think you need to adjust the zoom based on the rout elength so that with initial (or recentred) zoom the whole route fits the screen. I sthat possible ?"
+
+22. "its a lot better but can you shift the end ever so slighlty up, also by default can the route card be minimised"
+
+23. "No you have shifted it the wrong way I wanted it shifted up not down could you reverse this pelase."

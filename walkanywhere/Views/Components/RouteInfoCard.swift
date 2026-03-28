@@ -11,81 +11,106 @@ import MapKit
 struct RouteInfoCard: View {
   let route: SavedRoute
   let progress: (completed: Int, total: Int, isCompleted: Bool)?
+  let onRecentre: () -> Void
+  @State private var isMinimized = true
 
   var body: some View {
     VStack(spacing: 12) {
-      Text(route.name)
-        .font(.title2)
-        .fontWeight(.bold)
-
-      HStack(alignment: .firstTextBaseline, spacing: 4) {
-        Text(String(format: "%.2f", route.distance / 1000))
-          .font(.system(size: 36, weight: .bold, design: .rounded))
-        Text("km")
-          .font(.title3)
-          .foregroundStyle(.secondary)
-      }
-
-      // Progress bar
-      if let progress = progress {
-        VStack(spacing: 6) {
-          GeometryReader { geometry in
-            ZStack(alignment: .leading) {
-              RoundedRectangle(cornerRadius: 8)
-                .fill(.gray.opacity(0.2))
-                .frame(height: 12)
-
-              RoundedRectangle(cornerRadius: 8)
-                .fill(progress.isCompleted ? .green : .blue)
-                .frame(width: min(CGFloat(progress.completed) / CGFloat(progress.total) * geometry.size.width, geometry.size.width), height: 12)
-            }
+      HStack {
+        Text(route.name)
+          .font(.title2)
+          .fontWeight(.bold)
+        Spacer()
+        Button(action: {
+          onRecentre()
+        }) {
+          Image(systemName: "location.circle.fill")
+            .font(.title3)
+            .foregroundStyle(.blue)
+            .frame(width: 30, height: 30)
+        }
+        Button(action: {
+          withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+            isMinimized.toggle()
           }
-          .frame(height: 12)
-
-          HStack {
-            if progress.isCompleted {
-              Text("✓ Completed!")
-                .font(.caption)
-                .foregroundStyle(.green)
-                .fontWeight(.semibold)
-              Spacer()
-            } else {
-              Text("\(progress.completed) / \(progress.total) steps")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-              Spacer()
-              Text("\(Int(Double(progress.completed) / Double(progress.total) * 100))%")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .fontWeight(.semibold)
-            }
-          }
+        }) {
+          Image(systemName: isMinimized ? "chevron.up" : "chevron.down")
+            .font(.title3)
+            .foregroundStyle(.secondary)
+            .frame(width: 30, height: 30)
         }
       }
 
-      Divider()
-        .padding(.vertical, 4)
-
-      HStack(spacing: 24) {
-        VStack(spacing: 4) {
-          Image(systemName: "figure.walk")
+      if !isMinimized {
+        HStack(alignment: .firstTextBaseline, spacing: 4) {
+          Text(String(format: "%.2f", route.distance / 1000))
+            .font(.system(size: 36, weight: .bold, design: .rounded))
+          Text("km")
             .font(.title3)
-            .foregroundStyle(.secondary)
-          Text(route.formattedTime)
-            .font(.subheadline)
             .foregroundStyle(.secondary)
         }
 
-        VStack(spacing: 4) {
-          Image(systemName: "shoeprints.fill")
-            .font(.title3)
-            .foregroundStyle(.secondary)
-          Text(route.formattedSteps)
-            .font(.subheadline)
-            .foregroundStyle(.secondary)
-          Text("goal")
-            .font(.caption2)
-            .foregroundStyle(.secondary)
+        // Progress bar
+        if let progress = progress {
+          VStack(spacing: 6) {
+            GeometryReader { geometry in
+              ZStack(alignment: .leading) {
+                RoundedRectangle(cornerRadius: 8)
+                  .fill(.gray.opacity(0.2))
+                  .frame(height: 12)
+
+                RoundedRectangle(cornerRadius: 8)
+                  .fill(progress.isCompleted ? .green : .blue)
+                  .frame(width: min(CGFloat(progress.completed) / CGFloat(progress.total) * geometry.size.width, geometry.size.width), height: 12)
+              }
+            }
+            .frame(height: 12)
+
+            HStack {
+              if progress.isCompleted {
+                Text("✓ Completed!")
+                  .font(.caption)
+                  .foregroundStyle(.green)
+                  .fontWeight(.semibold)
+                Spacer()
+              } else {
+                Text("\(progress.completed) / \(progress.total) steps")
+                  .font(.caption)
+                  .foregroundStyle(.secondary)
+                Spacer()
+                Text("\(Int(Double(progress.completed) / Double(progress.total) * 100))%")
+                  .font(.caption)
+                  .foregroundStyle(.secondary)
+                  .fontWeight(.semibold)
+              }
+            }
+          }
+        }
+
+        Divider()
+          .padding(.vertical, 4)
+
+        HStack(spacing: 24) {
+          VStack(spacing: 4) {
+            Image(systemName: "figure.walk")
+              .font(.title3)
+              .foregroundStyle(.secondary)
+            Text(route.formattedTime)
+              .font(.subheadline)
+              .foregroundStyle(.secondary)
+          }
+
+          VStack(spacing: 4) {
+            Image(systemName: "shoeprints.fill")
+              .font(.title3)
+              .foregroundStyle(.secondary)
+            Text(route.formattedSteps)
+              .font(.subheadline)
+              .foregroundStyle(.secondary)
+            Text("goal")
+              .font(.caption2)
+              .foregroundStyle(.secondary)
+          }
         }
       }
     }
@@ -141,6 +166,7 @@ struct RouteInfoCard: View {
       estimatedTime: 3600,
       polyline: MKPolyline()
     ),
-    progress: (completed: 2500, total: 5000, isCompleted: false)
+    progress: (completed: 2500, total: 5000, isCompleted: false),
+    onRecentre: { }
   )
 }
