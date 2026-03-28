@@ -51,3 +51,11 @@ This file contains all user prompts from the development of this project.
 22. "its a lot better but can you shift the end ever so slighlty up, also by default can the route card be minimised"
 
 23. "No you have shifted it the wrong way I wanted it shifted up not down could you reverse this pelase."
+
+24. "Now on the routes createa  route page, when I select a second point I cant see the entire route due to the route card, can you make the route card lower and adjust zoom /position of the screen so that the entire route is visible ?"
+
+25. "I dont want the route details on the create a route page to start miimised just further down as they have a lot fo empty space below them. but adjust the route to fit amove the maximised route details. in fact can you make ti so you can't minimsie the route detaisl on the create a route page."
+
+26. "You have moved the route details card on the create a route higher can you move it lower please."
+
+27. "Ok the route card has a draw handle can you remove this and instead have one on the entire create route popover view ?"

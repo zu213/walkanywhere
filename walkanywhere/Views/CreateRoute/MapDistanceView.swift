@@ -171,14 +171,36 @@ struct MapDistanceView: View {
 
           // Adjust view to show the entire route
           let rect = route.polyline.boundingMapRect
-          let region = MKCoordinateRegion(rect)
+          let baseRegion = MKCoordinateRegion(rect)
 
-          // Add some padding
+          // Account for UI elements: Expanded drawer (~280pt) + extra padding (20pt) + top nav (~100pt)
+          let bottomUIHeight: CGFloat = 300
+          let topUIHeight: CGFloat = 100
+
+          // Estimate screen height (typical iPhone height ~850pt)
+          let estimatedScreenHeight: CGFloat = 850
+          let availableHeight = estimatedScreenHeight - bottomUIHeight - topUIHeight
+
+          // Calculate zoom factor to fit route in visible area
+          let visibleHeightRatio = Double(estimatedScreenHeight / availableHeight)
+
+          // Calculate shift to center route in visible area
+          let netUIOffset = bottomUIHeight - topUIHeight
+          let verticalShiftRatio = Double(netUIOffset / estimatedScreenHeight)
+
+          // Shift center down (subtract from latitude) to move content up on screen
+          let shiftedCenter = CLLocationCoordinate2D(
+            latitude: baseRegion.center.latitude - (baseRegion.span.latitudeDelta * verticalShiftRatio),
+            longitude: baseRegion.center.longitude
+          )
+
+          // Apply zoom with padding
+          let totalZoomFactor = visibleHeightRatio * 1.3
           let expandedRegion = MKCoordinateRegion(
-            center: region.center,
+            center: shiftedCenter,
             span: MKCoordinateSpan(
-              latitudeDelta: region.span.latitudeDelta * 1.3,
-              longitudeDelta: region.span.longitudeDelta * 1.3
+              latitudeDelta: baseRegion.span.latitudeDelta * totalZoomFactor,
+              longitudeDelta: baseRegion.span.longitudeDelta * totalZoomFactor
             )
           )
 
@@ -306,13 +328,31 @@ struct MapDistanceView: View {
       distance = totalDistance
       estimatedTime = totalTime
 
-      // Adjust view to show both points
-      let spanLat = abs(start.latitude - end.latitude) * 1.5
-      let spanLon = abs(start.longitude - end.longitude) * 1.5
+      // Adjust view to show both points with UI compensation
+      let spanLat = abs(start.latitude - end.latitude)
+      let spanLon = abs(start.longitude - end.longitude)
 
+      // Account for UI elements: Expanded drawer (~280pt) + extra padding (20pt) + top nav (~100pt)
+      let bottomUIHeight: CGFloat = 300
+      let topUIHeight: CGFloat = 100
+      let estimatedScreenHeight: CGFloat = 850
+      let availableHeight = estimatedScreenHeight - bottomUIHeight - topUIHeight
+
+      let visibleHeightRatio = Double(estimatedScreenHeight / availableHeight)
+      let netUIOffset = bottomUIHeight - topUIHeight
+      let verticalShiftRatio = Double(netUIOffset / estimatedScreenHeight)
+
+      // Shift center down to move content up
+      let shiftedLat = midLat - (spanLat * verticalShiftRatio)
+
+      // Apply zoom
+      let totalZoomFactor = visibleHeightRatio * 1.3
       position = .region(MKCoordinateRegion(
-        center: CLLocationCoordinate2D(latitude: midLat, longitude: midLon),
-        span: MKCoordinateSpan(latitudeDelta: max(spanLat, 0.01), longitudeDelta: max(spanLon, 0.01))
+        center: CLLocationCoordinate2D(latitude: shiftedLat, longitude: midLon),
+        span: MKCoordinateSpan(
+          latitudeDelta: max(spanLat * totalZoomFactor, 0.01),
+          longitudeDelta: max(spanLon * totalZoomFactor, 0.01)
+        )
       ))
 
       isCalculatingRoute = false

@@ -125,6 +125,7 @@ struct SavedRoutesView: View {
         MapDistanceView(routeManager: routeManager, onRouteSaved: {
           showingMapSheet = false
         })
+        .presentationDragIndicator(.visible)
       }
 
       // Glassy navigation title at the top

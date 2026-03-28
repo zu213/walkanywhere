@@ -21,35 +21,16 @@ struct RouteDetailsDrawer: View {
 
   var body: some View {
     VStack(spacing: 0) {
-      // Drawer handle
-      Button(action: {
-        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-          isExpanded.toggle()
-        }
-      }) {
-        VStack(spacing: 8) {
-          RoundedRectangle(cornerRadius: 2.5)
-            .fill(Color.secondary.opacity(0.5))
-            .frame(width: 36, height: 5)
-            .padding(.top, 8)
-
-          HStack {
-            Text("Route Details")
-              .font(.headline)
-              .foregroundStyle(.primary)
-            Spacer()
-            Image(systemName: isExpanded ? "chevron.down" : "chevron.up")
-              .foregroundStyle(.secondary)
-              .imageScale(.small)
-          }
-          .padding(.horizontal)
-          .padding(.bottom, 8)
-        }
-        .contentShape(Rectangle())
+      // Header without drawer handle
+      HStack {
+        Text("Route Details")
+          .font(.headline)
+          .foregroundStyle(.primary)
+        Spacer()
       }
-      .buttonStyle(.plain)
-
-      if isExpanded {
+      .padding(.horizontal)
+      .padding(.top, 12)
+      .padding(.bottom, 8)
         VStack(spacing: 8) {
           if startLocation != nil && endLocation != nil {
             if isCalculatingRoute {
@@ -104,12 +85,11 @@ struct RouteDetailsDrawer: View {
         }
         .padding(.horizontal)
         .padding(.bottom)
-      }
     }
     .background(.regularMaterial)
     .clipShape(RoundedRectangle(cornerRadius: 16))
     .padding()
-    .padding(.bottom, 80)
+    .padding(.bottom, 20)
   }
 
   private func formatTime(_ seconds: TimeInterval) -> String {
