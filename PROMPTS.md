@@ -59,3 +59,9 @@ This file contains all user prompts from the development of this project.
 26. "You have moved the route details card on the create a route higher can you move it lower please."
 
 27. "Ok the route card has a draw handle can you remove this and instead have one on the entire create route popover view ?"
+
+28. "can you add a search bar to the create a route page that lets you find locations, but if possible can it not drop a pin just scroll you to that location like maps normally do."
+
+29. "the search is good. but it is too zoomed in i thought the zoom depended ont eh place you specify e.g. if i type Span it should be more zoomed dout than if i type Madrid."
+
+30. "Can you shift the title and search bar upa  bit on the create a route page there is a lot of space above them."

@@ -22,6 +22,9 @@ struct MapDistanceView: View {
   @State private var showingSaveSheet = false
   @State private var routeName = ""
   @State private var isDrawerExpanded = true
+  @State private var searchText = ""
+  @State private var searchResults: [MKMapItem] = []
+  @State private var isSearching = false
 
   var routeManager: RouteManager
   var onRouteSaved: (() -> Void)?
@@ -120,12 +123,76 @@ struct MapDistanceView: View {
         .presentationDetents([.medium])
       }
 
-      // Glassy navigation title at the top
-      VStack {
+      // Glassy navigation title and search bar at the top
+      VStack(spacing: 12) {
         GlassyNavigationTitle(title: "Create a route")
-          .padding(.top, 60)
+          .padding(.top, 20)
           .padding(.leading, 20)
           .frame(maxWidth: .infinity, alignment: .leading)
+
+        // Search bar
+        VStack(spacing: 4) {
+          HStack {
+            Image(systemName: "magnifyingglass")
+              .foregroundStyle(.secondary)
+            TextField("Search for a location", text: $searchText)
+              .textFieldStyle(.plain)
+              .autocorrectionDisabled()
+              .onSubmit {
+                Task {
+                  await performSearch()
+                }
+              }
+            if !searchText.isEmpty {
+              Button(action: {
+                searchText = ""
+                searchResults = []
+              }) {
+                Image(systemName: "xmark.circle.fill")
+                  .foregroundStyle(.secondary)
+              }
+            }
+          }
+          .padding(12)
+          .background(.ultraThinMaterial)
+          .clipShape(RoundedRectangle(cornerRadius: 12))
+          .padding(.horizontal, 20)
+
+          // Search results dropdown
+          if !searchResults.isEmpty {
+            ScrollView {
+              VStack(spacing: 0) {
+                ForEach(searchResults, id: \.self) { item in
+                  Button(action: {
+                    moveToLocation(item)
+                    searchText = item.name ?? ""
+                    searchResults = []
+                  }) {
+                    VStack(alignment: .leading, spacing: 4) {
+                      Text(item.name ?? "Unknown")
+                        .font(.body)
+                        .foregroundStyle(.primary)
+                      if let address = item.placemark.title {
+                        Text(address)
+                          .font(.caption)
+                          .foregroundStyle(.secondary)
+                      }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(12)
+                  }
+                  .buttonStyle(.plain)
+                  Divider()
+                }
+              }
+            }
+            .frame(maxHeight: 200)
+            .background(.regularMaterial)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .padding(.horizontal, 20)
+          }
+        }
+
         Spacer()
       }
     }
@@ -389,6 +456,68 @@ struct MapDistanceView: View {
     distance = 0
     routePolyline = nil
     estimatedTime = 0
+  }
+
+  private func performSearch() async {
+    guard !searchText.isEmpty else {
+      searchResults = []
+      return
+    }
+
+    isSearching = true
+
+    let request = MKLocalSearch.Request()
+    request.naturalLanguageQuery = searchText
+
+    // Use current map region for better results
+    let currentRegion = MKCoordinateRegion(
+      center: position.region?.center ?? CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194),
+      span: position.region?.span ?? MKCoordinateSpan(latitudeDelta: 0.5, longitudeDelta: 0.5)
+    )
+    request.region = currentRegion
+
+    let search = MKLocalSearch(request: request)
+
+    do {
+      let response = try await search.start()
+      await MainActor.run {
+        searchResults = Array(response.mapItems.prefix(5)) // Limit to 5 results
+        isSearching = false
+      }
+    } catch {
+      await MainActor.run {
+        searchResults = []
+        isSearching = false
+      }
+    }
+  }
+
+  private func moveToLocation(_ mapItem: MKMapItem) {
+    // Use the bounding region if available (for cities, countries, etc.)
+    // Otherwise use the coordinate with a default zoom
+    let region: MKCoordinateRegion
+
+    if let boundingRegion = mapItem.placemark.region as? CLCircularRegion {
+      // If we have a circular region, use its radius to determine zoom
+      let radius = boundingRegion.radius
+      // Convert radius to coordinate span (approximate)
+      let span = radius / 111000.0 // 111km per degree approximately
+      region = MKCoordinateRegion(
+        center: mapItem.placemark.coordinate,
+        span: MKCoordinateSpan(latitudeDelta: span * 2.5, longitudeDelta: span * 2.5)
+      )
+    } else {
+      // For specific addresses or points without region info, use a closer zoom
+      region = MKCoordinateRegion(
+        center: mapItem.placemark.coordinate,
+        span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
+      )
+    }
+
+    // Animate to the location
+    withAnimation {
+      position = .region(region)
+    }
   }
 }
 
