@@ -12,7 +12,18 @@ struct RouteInfoCard: View {
   let route: SavedRoute
   let progress: (completed: Int, total: Int, isCompleted: Bool)?
   let onRecentre: () -> Void
-  @State private var isMinimized = true
+  let initiallyMinimized: Bool
+  let bottomPadding: CGFloat
+  @State private var isMinimized: Bool
+
+  init(route: SavedRoute, progress: (completed: Int, total: Int, isCompleted: Bool)?, onRecentre: @escaping () -> Void, initiallyMinimized: Bool = true, bottomPadding: CGFloat = 100) {
+    self.route = route
+    self.progress = progress
+    self.onRecentre = onRecentre
+    self.initiallyMinimized = initiallyMinimized
+    self.bottomPadding = bottomPadding
+    self._isMinimized = State(initialValue: initiallyMinimized)
+  }
 
   var body: some View {
     VStack(spacing: 12) {
@@ -152,7 +163,7 @@ struct RouteInfoCard: View {
       }
     )
     .padding(.horizontal, 20)
-    .padding(.bottom, 100)
+    .padding(.bottom, bottomPadding)
   }
 }
 

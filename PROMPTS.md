@@ -65,3 +65,15 @@ This file contains all user prompts from the development of this project.
 29. "the search is good. but it is too zoomed in i thought the zoom depended ont eh place you specify e.g. if i type Span it should be more zoomed dout than if i type Madrid."
 
 30. "Can you shift the title and search bar upa  bit on the create a route page there is a lot of space above them."
+
+31. "On the my routes apge can you add a detlete button for routes and if the main route is deleted can you make it go back to being unset"
+
+32. "Can you make it a drag to delete instead / swipe to delete"
+
+33. "On the my toutes page can you make it so if you clikc a route it is viewable in a popup similiar to the create one but you can't edit it."
+
+34. "on this popup can you move the route card to the bottom of the page and amke it epanded by default."
+
+35. "no id nt mean reposition the map i mean move the card down its in the same place :( now the route is behind it"
+
+36. "can you fix the preview in MainRouteView"

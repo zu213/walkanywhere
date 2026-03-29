@@ -149,6 +149,8 @@ struct MapMarker: View {
 }
 
 #Preview {
-//  let manager = RouteManager()
-//  MainRouteView(routeManager: manager, stepMonitor: StepMonitor(routeManager: manager, healthKitManager: <#HealthKitManager#>))
+  let routeManager = RouteManager()
+  let healthKitManager = HealthKitManager()
+  let stepMonitor = StepMonitor(routeManager: routeManager, healthKitManager: healthKitManager)
+  return MainRouteView(routeManager: routeManager, stepMonitor: stepMonitor)
 }
