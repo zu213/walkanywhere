@@ -31,20 +31,45 @@ struct StepHistoryView: View {
                 .foregroundStyle(.red)
                 .font(.caption)
             } else {
-              Button("Enable Health Access") {
-                Task {
-                  await healthKitManager.requestAuthorization()
+              VStack(spacing: 8) {
+                Button("Enable Health Access") {
+                  Task {
+                    await healthKitManager.requestAuthorization()
+                  }
                 }
+                .buttonStyle(.borderedProminent)
+
+                #if DEBUG
+                Button("DEBUG: Force Enable (Simulator)") {
+                  healthKitManager.isAuthorized = true
+                  Task {
+                    await healthKitManager.fetchTodaySteps()
+                    await healthKitManager.fetchStepHistory(days: 30)
+                  }
+                }
+                .buttonStyle(.bordered)
+                .tint(.orange)
+
+                Text("Debug: isAuthorized = \(healthKitManager.isAuthorized ? "true" : "false")")
+                  .font(.caption2)
+                  .foregroundStyle(.secondary)
+                #endif
               }
-              .buttonStyle(.borderedProminent)
             }
           }
           .padding(.vertical, 8)
         }
 
-        if healthKitManager.isAuthorized && !healthKitManager.stepHistory.isEmpty {
-          Section("Step History") {
-            ForEach(healthKitManager.stepHistory) { stepData in
+        if healthKitManager.isAuthorized {
+          if healthKitManager.stepHistory.isEmpty {
+            Section("Step History") {
+              Text("No step history available")
+                .foregroundStyle(.secondary)
+                .font(.caption)
+            }
+          } else {
+            Section("Step History") {
+              ForEach(healthKitManager.stepHistory) { stepData in
               HStack {
                 VStack(alignment: .leading, spacing: 4) {
                   Text(stepData.formattedDate)
@@ -60,6 +85,7 @@ struct StepHistoryView: View {
               }
               .padding(.vertical, 4)
             }
+          }
           }
         }
       }

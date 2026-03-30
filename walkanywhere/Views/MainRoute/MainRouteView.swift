@@ -71,6 +71,7 @@ struct MainRouteView: View {
           showingDebugMenu = true
         }, tintColor: .red)
         .padding(.trailing, 20)
+        .hidden()
         #endif
       }
       .padding(.top, 60)

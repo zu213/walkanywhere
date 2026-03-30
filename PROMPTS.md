@@ -79,3 +79,17 @@ This file contains all user prompts from the development of this project.
 36. "can you fix the preview in MainRouteView"
 
 37. "how to fix \"Cannot create a iOS App Development provisioning profile for \"com.zachup.walkanywhere\".\nPersonal development teams, including \"Zachary Upstone\", do not support the HealthKit Access (Verifiable Health Records) capability.\""
+
+38. "can you hide the debug button for now keep the ligc but make it invisible"
+
+39. "Can you fix the steps page it assk for health access everyitme i only want it to ask until you give permissions then it should remember for all future usages."
+
+40. "no the steps page never shows the steps now even if health is enabled atleast on the simulator."
+
+41. "the step history still doesnt show at all. just the enable health access button..."
+
+42. "it shosw is authorized = false, despite me eauthroising on an earlier riun additionally if i press the button it does ntohing."
+
+43. "um the issue is exactly the same on a real dvice... i can also see the debug button real device but i assume this isnt an issue,"
+
+44. "okay i kinda fixed ir when i press the button it works but, i need to rpess it everytime i go to the page can you make it run the logic that runs when it press it owhenever i view aswell"

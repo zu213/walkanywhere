@@ -19,39 +19,49 @@ class HealthKitManager {
 
   func checkAuthorizationStatus() async {
     guard HKHealthStore.isHealthDataAvailable() else {
+      await MainActor.run {
+        self.authorizationError = "HealthKit is not available on this device"
+      }
       return
     }
 
-    let stepType = HKQuantityType.quantityType(forIdentifier: .stepCount)!
-    let status = healthStore.authorizationStatus(for: stepType)
-
+    // Don't check authorizationStatus — it only reflects write permission.
+    // Just assume authorized and try to fetch. If user hasn't granted access, queries return empty/0
     await MainActor.run {
-      self.isAuthorized = (status == .sharingAuthorized)
+      self.isAuthorized = true
     }
 
-    if isAuthorized {
-      await fetchTodaySteps()
-      await fetchStepHistory(days: 30)
-    }
+    await fetchTodaySteps()
+    await fetchStepHistory(days: 30)
   }
 
   func requestAuthorization() async {
-    guard HKHealthStore.isHealthDataAvailable() else {
-      authorizationError = "Health data is not available on this device"
-      return
-    }
+      guard HKHealthStore.isHealthDataAvailable() else {
+          await MainActor.run {
+              self.authorizationError = "Health data is not available on this device"
+          }
+          return
+      }
 
-    let stepType = HKQuantityType.quantityType(forIdentifier: .stepCount)!
+      let stepType = HKQuantityType.quantityType(forIdentifier: .stepCount)!
 
-    do {
-      try await healthStore.requestAuthorization(toShare: [], read: [stepType])
-      isAuthorized = true
-      await fetchTodaySteps()
-      await fetchStepHistory(days: 30)
-    } catch {
-      authorizationError = "Failed to authorize HealthKit: \(error.localizedDescription)"
-      isAuthorized = false
-    }
+      do {
+          try await healthStore.requestAuthorization(toShare: [], read: [stepType])
+
+          // Don't check authorizationStatus — it only reflects write permission.
+          // Just attempt to read. If the user granted read access, we'll get data.
+          await MainActor.run {
+              self.isAuthorized = true // Assume authorized; if denied, queries just return 0
+          }
+
+          await fetchTodaySteps()
+          await fetchStepHistory(days: 30)
+      } catch {
+          await MainActor.run {
+              self.authorizationError = "Failed to authorize HealthKit: \(error.localizedDescription)"
+              self.isAuthorized = false
+          }
+      }
   }
 
   func fetchTodaySteps() async {
