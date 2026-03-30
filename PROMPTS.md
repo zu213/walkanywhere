@@ -93,3 +93,7 @@ This file contains all user prompts from the development of this project.
 43. "um the issue is exactly the same on a real dvice... i can also see the debug button real device but i assume this isnt an issue,"
 
 44. "okay i kinda fixed ir when i press the button it works but, i need to rpess it everytime i go to the page can you make it run the logic that runs when it press it owhenever i view aswell"
+
+45. "can you add on the main route a dot on the blue route line for how far along it a user is based on there current steps associated with that route."
+
+46. "can you adda  close button to the top right of the createa route page to dismiss it."

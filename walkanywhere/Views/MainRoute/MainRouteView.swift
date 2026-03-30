@@ -28,6 +28,23 @@ struct MainRouteView: View {
                 MapMarker(label: "B", color: .red)
               }
 
+              // Progress marker
+              if let progress = routeManager.getStepsProgress(for: mainRoute.id, currentSteps: stepMonitor.todaySteps),
+                 !progress.isCompleted,
+                 let progressCoordinate = calculateProgressCoordinate(for: mainRoute, progress: Double(progress.completed) / Double(progress.total)) {
+                Annotation("Your Progress", coordinate: progressCoordinate) {
+                  ZStack {
+                    Circle()
+                      .fill(.white)
+                      .frame(width: 20, height: 20)
+                    Circle()
+                      .fill(.blue)
+                      .frame(width: 16, height: 16)
+                  }
+                  .shadow(radius: 4)
+                }
+              }
+
               MapPolyline(mainRoute.createPolyline())
                 .stroke(.blue, lineWidth: 4)
             }
@@ -130,6 +147,53 @@ struct MainRouteView: View {
     )
 
     position = .region(adjustedRegion)
+  }
+
+  private func calculateProgressCoordinate(for route: SavedRoute, progress: Double) -> CLLocationCoordinate2D? {
+    let polyline = route.createPolyline()
+    let points = polyline.points()
+    let pointCount = polyline.pointCount
+
+    guard pointCount > 1 else { return nil }
+
+    // Calculate total distance
+    var totalDistance: CLLocationDistance = 0
+    for i in 0..<(pointCount - 1) {
+      let startCoord = points[i].coordinate
+      let endCoord = points[i + 1].coordinate
+      let startLocation = CLLocation(latitude: startCoord.latitude, longitude: startCoord.longitude)
+      let endLocation = CLLocation(latitude: endCoord.latitude, longitude: endCoord.longitude)
+      totalDistance += startLocation.distance(from: endLocation)
+    }
+
+    let targetDistance = totalDistance * progress
+    var accumulatedDistance: CLLocationDistance = 0
+
+    // Find the segment containing the target distance
+    for i in 0..<(pointCount - 1) {
+      let startCoord = points[i].coordinate
+      let endCoord = points[i + 1].coordinate
+      let startLocation = CLLocation(latitude: startCoord.latitude, longitude: startCoord.longitude)
+      let endLocation = CLLocation(latitude: endCoord.latitude, longitude: endCoord.longitude)
+      let segmentDistance = startLocation.distance(from: endLocation)
+
+      if accumulatedDistance + segmentDistance >= targetDistance {
+        // Target is in this segment
+        let remainingDistance = targetDistance - accumulatedDistance
+        let segmentProgress = remainingDistance / segmentDistance
+
+        // Interpolate between start and end coordinates
+        let lat = startCoord.latitude + (endCoord.latitude - startCoord.latitude) * segmentProgress
+        let lon = startCoord.longitude + (endCoord.longitude - startCoord.longitude) * segmentProgress
+
+        return CLLocationCoordinate2D(latitude: lat, longitude: lon)
+      }
+
+      accumulatedDistance += segmentDistance
+    }
+
+    // If we've gone past the end, return the last coordinate
+    return points[pointCount - 1].coordinate
   }
 }
 

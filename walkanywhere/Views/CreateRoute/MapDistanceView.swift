@@ -9,6 +9,7 @@ import SwiftUI
 import MapKit
 
 struct MapDistanceView: View {
+  @Environment(\.dismiss) private var dismiss
   @State private var position: MapCameraPosition = .region(MKCoordinateRegion(
     center: CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194),
     span: MKCoordinateSpan(latitudeDelta: 0.5, longitudeDelta: 0.5)
@@ -125,10 +126,16 @@ struct MapDistanceView: View {
 
       // Glassy navigation title and search bar at the top
       VStack(spacing: 12) {
-        GlassyNavigationTitle(title: "Create a route")
-          .padding(.top, 20)
-          .padding(.leading, 20)
-          .frame(maxWidth: .infinity, alignment: .leading)
+        HStack {
+          GlassyNavigationTitle(title: "Create a route")
+            .padding(.leading, 20)
+          Spacer()
+          GlassyButton(systemImage: "xmark", action: {
+            dismiss()
+          })
+          .padding(.trailing, 20)
+        }
+        .padding(.top, 20)
 
         // Search bar
         VStack(spacing: 4) {
