@@ -1,0 +1,43 @@
+{
+  "fill" : {
+    "automatic-gradient" : "display-p3:0.29878,0.96611,0.57289,1.00000"
+  },
+  "groups" : [
+    {
+      "layers" : [
+        {
+          "image-name" : "manwalking3 2.png",
+          "name" : "manwalking3 2"
+        },
+        {
+          "image-name" : "manwalking2 2.png",
+          "name" : "manwalking2 2"
+        },
+        {
+          "glass" : true,
+          "hidden" : true,
+          "image-name" : "manwalking1 2.png",
+          "name" : "manwalking1 2"
+        },
+        {
+          "image-name" : "manwalking.png",
+          "name" : "manwalking"
+        }
+      ],
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.5
+      }
+    }
+  ],
+  "supported-platforms" : {
+    "circles" : [
+      "watchOS"
+    ],
+    "squares" : "shared"
+  }
+}

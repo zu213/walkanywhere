@@ -77,3 +77,5 @@ This file contains all user prompts from the development of this project.
 35. "no id nt mean reposition the map i mean move the card down its in the same place :( now the route is behind it"
 
 36. "can you fix the preview in MainRouteView"
+
+37. "how to fix \"Cannot create a iOS App Development provisioning profile for \"com.zachup.walkanywhere\".\nPersonal development teams, including \"Zachary Upstone\", do not support the HealthKit Access (Verifiable Health Records) capability.\""
