@@ -1,2 +1,3 @@
-walkanywhere.xcodeproj/xcuserdata*
-walkanywhere.xcodeproj/project.xcworkspace
+.DS_Store
+walkanywhere.xcodeproj
+__include.json
