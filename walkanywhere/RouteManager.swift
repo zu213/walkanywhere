@@ -13,6 +13,7 @@ struct RouteProgress: Codable {
   let startDate: Date
   var isCompleted: Bool
   var completedSteps: Int? // The actual steps when completed/paused
+  var dailyContributions: [String: Int] = [:] // Date string (yyyy-MM-dd) -> steps contributed
 }
 
 @Observable
@@ -148,6 +149,36 @@ class RouteManager {
   func resetRouteProgress(_ routeId: UUID) {
     allRouteProgress.removeValue(forKey: routeId)
     saveAllProgress()
+  }
+
+  func updateDailyContribution(for routeId: UUID, date: Date, steps: Int) {
+    guard var progress = allRouteProgress[routeId] else { return }
+
+    let dateFormatter = DateFormatter()
+    dateFormatter.dateFormat = "yyyy-MM-dd"
+    let dateString = dateFormatter.string(from: date)
+
+    progress.dailyContributions[dateString] = steps
+    allRouteProgress[routeId] = progress
+    saveAllProgress()
+  }
+
+  func getDailyContributions(for date: Date) -> [(route: SavedRoute, steps: Int)] {
+    let dateFormatter = DateFormatter()
+    dateFormatter.dateFormat = "yyyy-MM-dd"
+    let dateString = dateFormatter.string(from: date)
+
+    var contributions: [(route: SavedRoute, steps: Int)] = []
+
+    for (routeId, progress) in allRouteProgress {
+      if let steps = progress.dailyContributions[dateString],
+         steps > 0,
+         let route = savedRoutes.first(where: { $0.id == routeId }) {
+        contributions.append((route: route, steps: steps))
+      }
+    }
+
+    return contributions.sorted { $0.steps > $1.steps }
   }
 
   private func saveRoutes() {

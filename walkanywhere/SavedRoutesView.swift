@@ -162,6 +162,7 @@ struct SavedRoutesView: View {
 }
 
 struct RouteViewSheet: View {
+  @Environment(\.dismiss) private var dismiss
   let route: SavedRoute
   let routeManager: RouteManager
   @State private var position: MapCameraPosition = .automatic
@@ -216,10 +217,16 @@ struct RouteViewSheet: View {
 
       // Glassy navigation title at the top
       VStack {
-        GlassyNavigationTitle(title: route.name)
-          .padding(.top, 20)
-          .padding(.leading, 20)
-          .frame(maxWidth: .infinity, alignment: .leading)
+        HStack {
+          GlassyNavigationTitle(title: route.name)
+            .padding(.leading, 20)
+          Spacer()
+          GlassyButton(systemImage: "xmark", action: {
+            dismiss()
+          })
+          .padding(.trailing, 20)
+        }
+        .padding(.top, 20)
         Spacer()
       }
     }

@@ -61,6 +61,21 @@ struct RouteInfoCard: View {
             .foregroundStyle(.secondary)
         }
 
+        // Distance traveled
+        if let progress = progress {
+          let distanceTraveled = (Double(progress.completed) / Double(progress.total)) * route.distance
+          let distanceTraveledKm = distanceTraveled / 1000
+
+          HStack(alignment: .firstTextBaseline, spacing: 4) {
+            Text(String(format: "%.1f", distanceTraveledKm))
+              .font(.system(size: 20, weight: .semibold, design: .rounded))
+              .foregroundStyle(distanceTraveledKm < 0.1 ? .gray : .secondary)
+            Text("/ \(String(format: "%.1f", route.distance / 1000)) km traveled")
+              .font(.subheadline)
+              .foregroundStyle(.secondary)
+          }
+        }
+
         // Progress bar
         if let progress = progress {
           VStack(spacing: 6) {

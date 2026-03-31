@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct StepHistoryView: View {
+  var routeManager: RouteManager
   @State private var healthKitManager = HealthKitManager()
 
   var body: some View {
@@ -70,22 +71,48 @@ struct StepHistoryView: View {
           } else {
             Section("Step History") {
               ForEach(healthKitManager.stepHistory) { stepData in
-              HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                  Text(stepData.formattedDate)
-                    .font(.body)
-                  Text(stepData.dayOfWeek)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                VStack(alignment: .leading, spacing: 8) {
+                  HStack {
+                    VStack(alignment: .leading, spacing: 4) {
+                      Text(stepData.formattedDate)
+                        .font(.body)
+                      Text(stepData.dayOfWeek)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    Text("\(stepData.stepCount)")
+                      .font(.system(size: 20, weight: .semibold, design: .rounded))
+                      .foregroundStyle(.blue)
+                  }
+
+                  // Route contribution pills
+                  let contributions = routeManager.getDailyContributions(for: stepData.date)
+                  if !contributions.isEmpty {
+                    FlowLayout(spacing: 6) {
+                      ForEach(Array(contributions.enumerated()), id: \.offset) { index, contribution in
+                        HStack(spacing: 4) {
+                          Circle()
+                            .fill(colorForRoute(index: index))
+                            .frame(width: 8, height: 8)
+                          Text(contribution.route.name)
+                            .font(.caption2)
+                            .lineLimit(1)
+                          Text("\(contribution.steps)")
+                            .font(.caption2)
+                            .fontWeight(.semibold)
+                        }
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(colorForRoute(index: index).opacity(0.15))
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                      }
+                    }
+                  }
                 }
-                Spacer()
-                Text("\(stepData.stepCount)")
-                  .font(.system(size: 20, weight: .semibold, design: .rounded))
-                  .foregroundStyle(.blue)
+                .padding(.vertical, 4)
               }
-              .padding(.vertical, 4)
             }
-          }
           }
         }
       }
@@ -107,8 +134,66 @@ struct StepHistoryView: View {
     }
     .ignoresSafeArea(edges: .top)
   }
+
+  private func colorForRoute(index: Int) -> Color {
+    let colors: [Color] = [.blue, .green, .purple, .orange, .pink, .indigo, .teal, .cyan]
+    return colors[index % colors.count]
+  }
+}
+
+// FlowLayout for wrapping pills
+struct FlowLayout: Layout {
+  var spacing: CGFloat = 8
+
+  func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+    let result = FlowResult(
+      in: proposal.replacingUnspecifiedDimensions().width,
+      subviews: subviews,
+      spacing: spacing
+    )
+    return result.size
+  }
+
+  func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+    let result = FlowResult(
+      in: bounds.width,
+      subviews: subviews,
+      spacing: spacing
+    )
+    for (index, subview) in subviews.enumerated() {
+      subview.place(at: CGPoint(x: bounds.minX + result.frames[index].minX, y: bounds.minY + result.frames[index].minY), proposal: .unspecified)
+    }
+  }
+
+  struct FlowResult {
+    var size: CGSize = .zero
+    var frames: [CGRect] = []
+
+    init(in maxWidth: CGFloat, subviews: Subviews, spacing: CGFloat) {
+      var currentX: CGFloat = 0
+      var currentY: CGFloat = 0
+      var lineHeight: CGFloat = 0
+
+      for subview in subviews {
+        let size = subview.sizeThatFits(.unspecified)
+
+        if currentX + size.width > maxWidth && currentX > 0 {
+          // New line
+          currentX = 0
+          currentY += lineHeight + spacing
+          lineHeight = 0
+        }
+
+        frames.append(CGRect(x: currentX, y: currentY, width: size.width, height: size.height))
+        lineHeight = max(lineHeight, size.height)
+        currentX += size.width + spacing
+      }
+
+      self.size = CGSize(width: maxWidth, height: currentY + lineHeight)
+    }
+  }
 }
 
 #Preview {
-  StepHistoryView()
+  StepHistoryView(routeManager: RouteManager())
 }

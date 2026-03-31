@@ -97,3 +97,9 @@ This file contains all user prompts from the development of this project.
 45. "can you add on the main route a dot on the blue route line for how far along it a user is based on there current steps associated with that route."
 
 46. "can you adda  close button to the top right of the createa route page to dismiss it."
+
+47. "can youa dda  close button to the routes you can view on the routes apge when you maximise them please."
+
+48. "can you add pills to the days on the steps page each pill should show how many of the steps on taht day contributed to waht route if you get me so potentially colour code them with there titles"
+
+49. "can you add on the main route card how far out the distance has been travelled so 0.1/0.2km or whatever if its 0.0 can you make the text colour mroe greyed out."

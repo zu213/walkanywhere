@@ -62,11 +62,31 @@ class StepMonitor {
       Task { @MainActor in
         self.todaySteps = Int(steps)
         self.healthKitManager.stepCount = Int(steps)
+        self.updateDailyContributions()
         self.checkRouteCompletion()
       }
     }
 
     healthStore.execute(query)
+  }
+
+  private func updateDailyContributions() {
+    let today = Date()
+
+    // Update contributions for the active main route
+    if let mainRouteId = routeManager.mainRouteId,
+       let progress = routeManager.getStepsProgress(for: mainRouteId, currentSteps: todaySteps) {
+      routeManager.updateDailyContribution(for: mainRouteId, date: today, steps: progress.completed)
+    }
+
+    // Update contributions for all paused routes
+    for (routeId, _) in routeManager.allRouteProgress {
+      if routeId != routeManager.mainRouteId,
+         let progress = routeManager.getStepsProgress(for: routeId, currentSteps: todaySteps),
+         progress.completed > 0 {
+        routeManager.updateDailyContribution(for: routeId, date: today, steps: progress.completed)
+      }
+    }
   }
 
   private func setupBackgroundStepQuery() {

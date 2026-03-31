@@ -32,7 +32,7 @@ struct ContentView: View {
           Label("Routes", systemImage: "list.bullet")
         }
 
-      StepHistoryView()
+      StepHistoryView(routeManager: routeManager)
         .tabItem {
           Label("Steps", systemImage: "figure.walk")
         }
