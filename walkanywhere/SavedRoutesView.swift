@@ -11,6 +11,7 @@ import MapKit
 struct SavedRoutesView: View {
   var routeManager: RouteManager
   var healthKitManager: HealthKitManager
+  var stepMonitor: StepMonitor
   @State private var showingMapSheet = false
   @State private var selectedRoute: SavedRoute?
 
@@ -134,7 +135,7 @@ struct SavedRoutesView: View {
         .presentationDragIndicator(.visible)
       }
       .sheet(item: $selectedRoute) { route in
-        RouteViewSheet(route: route, routeManager: routeManager)
+        RouteViewSheet(route: route, routeManager: routeManager, stepMonitor: stepMonitor)
           .presentationDragIndicator(.visible)
       }
 
@@ -165,6 +166,7 @@ struct RouteViewSheet: View {
   @Environment(\.dismiss) private var dismiss
   let route: SavedRoute
   let routeManager: RouteManager
+  let stepMonitor: StepMonitor
   @State private var position: MapCameraPosition = .automatic
 
   var body: some View {
@@ -204,7 +206,7 @@ struct RouteViewSheet: View {
         // Route info card at bottom
         RouteInfoCard(
           route: route,
-          progress: routeManager.getStepsProgress(for: route.id, currentSteps: 0),
+          progress: routeManager.getStepsProgress(for: route.id, currentSteps: route.id == routeManager.mainRouteId ? stepMonitor.todaySteps : 0),
           onRecentre: {
             withAnimation {
               setupMapPosition()
@@ -266,5 +268,8 @@ struct RouteViewSheet: View {
 }
 
 #Preview {
-  SavedRoutesView(routeManager: RouteManager(), healthKitManager: HealthKitManager())
+  let routeManager = RouteManager()
+  let healthKitManager = HealthKitManager()
+  let stepMonitor = StepMonitor(routeManager: routeManager, healthKitManager: healthKitManager)
+  SavedRoutesView(routeManager: routeManager, healthKitManager: healthKitManager, stepMonitor: stepMonitor)
 }

@@ -54,26 +54,23 @@ struct RouteInfoCard: View {
 
       if !isMinimized {
         HStack(alignment: .firstTextBaseline, spacing: 4) {
-          Text(String(format: "%.2f", route.distance / 1000))
+          if let progress = progress {
+            let distanceTraveled = (Double(progress.completed) / Double(progress.total)) * route.distance
+            let distanceTraveledKm = distanceTraveled / 1000
+            Text(String(format: "%.2f", distanceTraveledKm))
+              .font(.system(size: 36, weight: .semibold, design: .rounded))
+              .foregroundStyle(.secondary)
+          } else {
+            Text(String(format: "%.1f", 0.0))
+              .font(.system(size: 36, weight: .semibold, design: .rounded))
+              .foregroundStyle(.gray)
+          }
+
+          Text(String(format: "/ %.2f", route.distance / 1000))
             .font(.system(size: 36, weight: .bold, design: .rounded))
           Text("km")
             .font(.title3)
             .foregroundStyle(.secondary)
-        }
-
-        // Distance traveled
-        if let progress = progress {
-          let distanceTraveled = (Double(progress.completed) / Double(progress.total)) * route.distance
-          let distanceTraveledKm = distanceTraveled / 1000
-
-          HStack(alignment: .firstTextBaseline, spacing: 4) {
-            Text(String(format: "%.1f", distanceTraveledKm))
-              .font(.system(size: 20, weight: .semibold, design: .rounded))
-              .foregroundStyle(distanceTraveledKm < 0.1 ? .gray : .secondary)
-            Text("/ \(String(format: "%.1f", route.distance / 1000)) km traveled")
-              .font(.subheadline)
-              .foregroundStyle(.secondary)
-          }
         }
 
         // Progress bar

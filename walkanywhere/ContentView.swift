@@ -27,7 +27,7 @@ struct ContentView: View {
           Label("Main Route", systemImage: "star.fill")
         }
 
-      SavedRoutesView(routeManager: routeManager, healthKitManager: healthKitManager)
+      SavedRoutesView(routeManager: routeManager, healthKitManager: healthKitManager, stepMonitor: stepMonitor)
         .tabItem {
           Label("Routes", systemImage: "list.bullet")
         }
