@@ -103,3 +103,41 @@ This file contains all user prompts from the development of this project.
 48. "can you add pills to the days on the steps page each pill should show how many of the steps on taht day contributed to waht route if you get me so potentially colour code them with there titles"
 
 49. "can you add on the main route card how far out the distance has been travelled so 0.1/0.2km or whatever if its 0.0 can you make the text colour mroe greyed out."
+
+50. "you have written \"    // All other routes use their frozen progress\" can you make the main route also freze its prgoress when the app is clsoed then you can update it whenever the app is open with the difference is that possible s ?"
+
+51. "also the steps after you close the app for the day. this seems like sucha  simple problem why cant you fix it :("
+
+52. "can you add a tracker where you are along the distance realted to your current steps"
+
+53. "So I am stuck all the logic works quite well except the main route info isnt saved if a new day occurs ! on app launch can you check the history and if it is a new day correctly adjust the distance the step history page pills are accurate so these clearly work so maybe steal th elogic there to total how many steps users have done ona  route ?"
+
+54. "i will test it if persists but now whaaen i switch routes if i have steps after i open the app ( i add with debug) when i switch routes it takes the steps with it. can you fix this it should ever add steps on switch."
+
+55. "wow you made it worse when is witch routes it takes all the steps over with it. when you switch routes no step count on any route should change. it should only update a step when you step... or on app launch if the data is incorrect."
+
+56. "now it adds loads when is witch why is anything being added when i switch routes on the saved route page the logic for that shouldnt happen.it should not where it is an assign it to that route then the count of \"active\" steps so to speak should be 0"
+
+57. "wow you made it worse when is witch routes it takes all the steps over with it. when you switch routes no step count on any route should change. it should only update a step when you step... or on app launch if the data is incorrect."
+
+58. "it keeps the value overnight !! but now its not increasing when i do steps during the day at all it only increases when i use the artificial debug button ? have you decupled it from health kit completely ?"
+
+59. "I can see my steps in th ehealth app but they dotn appear in the step history when should they appear ? it doesnt appear anywhere the steps that come froma ctually walking they did before your recent change to fix the overnight not working."
+
+60. "nope the step history still doesnt show any steps from that day it says 0"
+
+61. "result is nil on the breakpoint in HealthKitManager fetchTodaySteps"
+
+## Session 3 - HealthKit Debugging & Bug Fixes
+
+62. "something in commit 100812d770a5acaceacd734f3bf5131da8c8aa4a is messing with all the logic can you fix this ?"
+
+63. "route history is broken it isnt showing thsteps from the last 30 days and never asked for enable health idk if it needs too."
+
+64. "okay at the moment loadMainROute jsut gets a uuid can you isntead get it to either (a) store daily contribution like save all progress does or (b) fetch said daily contribution from the all progress file to calcualte how far the user has walked for the mian route ? i think (a) iis better adn you can copy it over to the file when they switch routes ?"
+
+65. "Nice ! now can you make the dispalyed main route distance and actual the sum of these daily contributions ? as they update with todays steps this should just work ?"
+
+66. "okay now can you delete all the debug you / I added please ?"
+
+67. "Can oyou also remove the debug prints and such please. unless you think they are quite essential."

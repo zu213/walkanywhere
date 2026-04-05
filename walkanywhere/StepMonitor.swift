@@ -40,7 +40,7 @@ class StepMonitor {
     do {
       try await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge])
     } catch {
-      print("Failed to request notification permission: \(error)")
+      // Failed to request notification permission
     }
   }
 
@@ -73,19 +73,14 @@ class StepMonitor {
   private func updateDailyContributions() {
     let today = Date()
 
-    // Update contributions for the active main route
+    // Update daily contribution for the active main route ONLY
     if let mainRouteId = routeManager.mainRouteId,
-       let progress = routeManager.getStepsProgress(for: mainRouteId, currentSteps: todaySteps) {
-      routeManager.updateDailyContribution(for: mainRouteId, date: today, steps: progress.completed)
-    }
+       let progress = routeManager.getProgress(for: mainRouteId) {
+      // Calculate steps taken since this route became active (session steps)
+      let todaySessionSteps = max(0, todaySteps - progress.startingSteps)
 
-    // Update contributions for all paused routes
-    for (routeId, _) in routeManager.allRouteProgress {
-      if routeId != routeManager.mainRouteId,
-         let progress = routeManager.getStepsProgress(for: routeId, currentSteps: todaySteps),
-         progress.completed > 0 {
-        routeManager.updateDailyContribution(for: routeId, date: today, steps: progress.completed)
-      }
+      // Save to today's contributions
+      routeManager.updateDailyContribution(for: mainRouteId, date: today, steps: todaySessionSteps)
     }
   }
 
@@ -138,10 +133,8 @@ class StepMonitor {
 
     let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
 
-    UNUserNotificationCenter.current().add(request) { error in
-      if let error = error {
-        print("Failed to send notification: \(error)")
-      }
+    UNUserNotificationCenter.current().add(request) { _ in
+      // Notification sent
     }
   }
 }

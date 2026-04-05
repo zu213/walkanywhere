@@ -12,7 +12,6 @@ struct MainRouteView: View {
   var routeManager: RouteManager
   var stepMonitor: StepMonitor
   @State private var position: MapCameraPosition = .automatic
-  @State private var showingDebugMenu = false
 
   var body: some View {
     ZStack(alignment: .top) {
@@ -64,13 +63,6 @@ struct MainRouteView: View {
             )
           }
         }
-        .sheet(isPresented: $showingDebugMenu) {
-          DebugMenuSheet(
-            isPresented: $showingDebugMenu,
-            routeManager: routeManager,
-            stepMonitor: stepMonitor
-          )
-        }
       } else {
         ContentUnavailableView(
           "No Main Route Selected",
@@ -80,19 +72,10 @@ struct MainRouteView: View {
       }
 
       // Glassy navigation title at the top
-      HStack {
-        GlassyNavigationTitle(title: "Current Journey")
-        Spacer()
-        #if DEBUG
-        GlassyButton(systemImage: "ladybug.fill", action: {
-          showingDebugMenu = true
-        }, tintColor: .red)
-        .padding(.trailing, 20)
-        .hidden()
-        #endif
-      }
-      .padding(.top, 60)
-      .padding(.leading, 20)
+      GlassyNavigationTitle(title: "Current Journey")
+        .padding(.top, 60)
+        .padding(.leading, 20)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
     .ignoresSafeArea()
   }

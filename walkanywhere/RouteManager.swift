@@ -16,6 +16,12 @@ struct RouteProgress: Codable {
   var dailyContributions: [String: Int] = [:] // Date string (yyyy-MM-dd) -> steps contributed
 }
 
+// Stores both the main route ID and its current progress
+struct MainRouteData: Codable {
+  let routeId: UUID
+  let progress: RouteProgress
+}
+
 @Observable
 class RouteManager {
   var savedRoutes: [SavedRoute] = []
@@ -33,8 +39,8 @@ class RouteManager {
 
   init() {
     loadRoutes()
-    loadMainRoute()
-    loadAllProgress()
+    loadAllProgress() // Load backup progress first
+    loadMainRoute()   // Then load main route (overwrites with freshest data)
   }
 
   func getProgress(for routeId: UUID) -> RouteProgress? {
@@ -67,19 +73,21 @@ class RouteManager {
 
     mainRouteId = route.id
 
-    // Only create new progress if this route doesn't have progress yet or was completed
+    // Create new progress or resume existing progress
     if allRouteProgress[route.id] == nil || allRouteProgress[route.id]?.isCompleted == true {
+      // Brand new route or restarting a completed route
       allRouteProgress[route.id] = RouteProgress(
         routeId: route.id,
         startingSteps: currentSteps,
         startDate: Date(),
         isCompleted: false,
-        completedSteps: nil
+        completedSteps: nil,
+        dailyContributions: [:]
       )
-    } else if var progress = allRouteProgress[route.id], let frozenSteps = progress.completedSteps {
-      // If resuming a paused route, adjust the starting point
-      // New starting point = current steps - frozen progress
-      progress.startingSteps = currentSteps - frozenSteps
+    } else if var progress = allRouteProgress[route.id] {
+      // Resuming an existing route - just clear completedSteps and set new startingSteps
+      // dailyContributions already contains all previous progress!
+      progress.startingSteps = currentSteps
       progress.completedSteps = nil
       allRouteProgress[route.id] = progress
     }
@@ -100,6 +108,9 @@ class RouteManager {
   func completeRoute(_ routeId: UUID) {
     if var progress = allRouteProgress[routeId] {
       progress.isCompleted = true
+      // Store the final step count as sum of all daily contributions
+      let totalStepsFromContributions = progress.dailyContributions.values.reduce(0, +)
+      progress.completedSteps = totalStepsFromContributions
       allRouteProgress[routeId] = progress
       saveAllProgress()
     }
@@ -107,9 +118,9 @@ class RouteManager {
 
   func pauseRoute(_ routeId: UUID, currentSteps: Int) {
     if var progress = allRouteProgress[routeId] {
-      // Freeze the progress at the current step count
-      let stepsSinceStart = max(0, currentSteps - progress.startingSteps)
-      progress.completedSteps = stepsSinceStart
+      // Freeze the progress at the sum of all daily contributions
+      let totalStepsFromContributions = progress.dailyContributions.values.reduce(0, +)
+      progress.completedSteps = totalStepsFromContributions
       allRouteProgress[routeId] = progress
       saveAllProgress()
     }
@@ -120,26 +131,25 @@ class RouteManager {
         !progress.isCompleted,
         let route = savedRoutes.first(where: { $0.id == routeId }) else { return false }
 
-    let stepsSinceStart = currentSteps - progress.startingSteps
-    return stepsSinceStart >= route.estimatedSteps
+    // Calculate total steps from sum of all daily contributions
+    let totalStepsFromContributions = progress.dailyContributions.values.reduce(0, +)
+    return totalStepsFromContributions >= route.estimatedSteps
   }
 
   func getStepsProgress(for routeId: UUID, currentSteps: Int) -> (completed: Int, total: Int, isCompleted: Bool)? {
     guard let progress = allRouteProgress[routeId],
         let route = savedRoutes.first(where: { $0.id == routeId }) else { return nil }
 
-    // Only update live steps for the currently active main route
-    // All other routes use their frozen progress
+    // Calculate total steps from sum of all daily contributions
+    let totalStepsFromContributions = progress.dailyContributions.values.reduce(0, +)
+
+    // For completed routes, use the frozen completedSteps
     let stepsSinceStart: Int
-    if routeId == mainRouteId && progress.completedSteps == nil {
-      // This is the active main route - calculate live progress
-      stepsSinceStart = max(0, currentSteps - progress.startingSteps)
-    } else if let completedSteps = progress.completedSteps {
-      // This route is paused/inactive - use frozen progress
+    if progress.isCompleted, let completedSteps = progress.completedSteps {
       stepsSinceStart = completedSteps
     } else {
-      // Route has progress but is not active - freeze it at 0
-      stepsSinceStart = 0
+      // Use sum of daily contributions (works for both active and paused routes)
+      stepsSinceStart = totalStepsFromContributions
     }
 
     let completed = min(stepsSinceStart, route.estimatedSteps)
@@ -161,6 +171,7 @@ class RouteManager {
     progress.dailyContributions[dateString] = steps
     allRouteProgress[routeId] = progress
     saveAllProgress()
+    saveMainRoute()
   }
 
   func getDailyContributions(for date: Date) -> [(route: SavedRoute, steps: Int)] {
@@ -180,13 +191,18 @@ class RouteManager {
 
     return contributions.sorted { $0.steps > $1.steps }
   }
+  
+  func sumDailyContribution(since date: Date, routeId: UUID) -> Int {
+    /// I will implement this at some point
+    return 0
+  }
 
   private func saveRoutes() {
     do {
       let data = try JSONEncoder().encode(savedRoutes)
       try data.write(to: savePath)
     } catch {
-      print("Failed to save routes: \(error)")
+      // Failed to save routes
     }
   }
 
@@ -202,22 +218,34 @@ class RouteManager {
 
   private func saveMainRoute() {
     do {
-      if let id = mainRouteId {
-        let data = try JSONEncoder().encode(id)
+      if let id = mainRouteId, let progress = allRouteProgress[id] {
+        // Save both the route ID and its current progress (including dailyContributions)
+        let mainRouteData = MainRouteData(routeId: id, progress: progress)
+        let data = try JSONEncoder().encode(mainRouteData)
         try data.write(to: mainRoutePath)
       } else {
         // Remove the file if no main route is set
         try? FileManager.default.removeItem(at: mainRoutePath)
       }
     } catch {
-      print("Failed to save main route: \(error)")
+      // Failed to save main route
     }
   }
 
   private func loadMainRoute() {
     do {
       let data = try Data(contentsOf: mainRoutePath)
-      mainRouteId = try JSONDecoder().decode(UUID.self, from: data)
+
+      // Try to load new format (MainRouteData with progress)
+      if let mainRouteData = try? JSONDecoder().decode(MainRouteData.self, from: data) {
+        mainRouteId = mainRouteData.routeId
+        // IMPORTANT: Overwrite allRouteProgress with the saved data from mainRoute.json
+        // This ensures dailyContributions are preserved even if app crashed before saveAllProgress()
+        allRouteProgress[mainRouteData.routeId] = mainRouteData.progress
+      } else {
+        // Fall back to old format (just UUID) for backwards compatibility
+        mainRouteId = try JSONDecoder().decode(UUID.self, from: data)
+      }
     } catch {
       // No main route set
       mainRouteId = nil
@@ -229,7 +257,7 @@ class RouteManager {
       let data = try JSONEncoder().encode(allRouteProgress)
       try data.write(to: allProgressPath)
     } catch {
-      print("Failed to save all progress: \(error)")
+      // Failed to save all progress
     }
   }
 

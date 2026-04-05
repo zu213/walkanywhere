@@ -32,30 +32,12 @@ struct StepHistoryView: View {
                 .foregroundStyle(.red)
                 .font(.caption)
             } else {
-              VStack(spacing: 8) {
-                Button("Enable Health Access") {
-                  Task {
-                    await healthKitManager.requestAuthorization()
-                  }
+              Button("Enable Health Access") {
+                Task {
+                  await healthKitManager.requestAuthorization()
                 }
-                .buttonStyle(.borderedProminent)
-
-                #if DEBUG
-                Button("DEBUG: Force Enable (Simulator)") {
-                  healthKitManager.isAuthorized = true
-                  Task {
-                    await healthKitManager.fetchTodaySteps()
-                    await healthKitManager.fetchStepHistory(days: 30)
-                  }
-                }
-                .buttonStyle(.bordered)
-                .tint(.orange)
-
-                Text("Debug: isAuthorized = \(healthKitManager.isAuthorized ? "true" : "false")")
-                  .font(.caption2)
-                  .foregroundStyle(.secondary)
-                #endif
               }
+              .buttonStyle(.borderedProminent)
             }
           }
           .padding(.vertical, 8)
