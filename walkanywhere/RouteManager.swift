@@ -14,6 +14,9 @@ struct RouteProgress: Codable {
   var isCompleted: Bool
   var completedSteps: Int? // The actual steps when completed/paused
   var dailyContributions: [String: Int] = [:] // Date string (yyyy-MM-dd) -> steps contributed
+  var stepsSoFarOnSelectedDay: Int? // Snapshot of total steps when this route was set as main
+  var selectedDayString: String? // Which day it was selected (yyyy-MM-dd)
+  var startingStepsDate: String? // Which day (yyyy-MM-dd) startingSteps was calculated for
 }
 
 // Stores both the main route ID and its current progress
@@ -73,6 +76,10 @@ class RouteManager {
 
     mainRouteId = route.id
 
+    let dateFormatter = DateFormatter()
+    dateFormatter.dateFormat = "yyyy-MM-dd"
+    let todayString = dateFormatter.string(from: Date())
+
     // Create new progress or resume existing progress
     if allRouteProgress[route.id] == nil || allRouteProgress[route.id]?.isCompleted == true {
       // Brand new route or restarting a completed route
@@ -82,13 +89,37 @@ class RouteManager {
         startDate: Date(),
         isCompleted: false,
         completedSteps: nil,
-        dailyContributions: [:]
+        dailyContributions: [:],
+        stepsSoFarOnSelectedDay: currentSteps,
+        selectedDayString: todayString,
+        startingStepsDate: todayString
       )
     } else if var progress = allRouteProgress[route.id] {
-      // Resuming an existing route - just clear completedSteps and set new startingSteps
-      // dailyContributions already contains all previous progress!
-      progress.startingSteps = currentSteps
+      // Resuming an existing route
+      // IMPORTANT: currentSteps is only TODAY's steps from HealthKit
+      // We need to know: how many of today's steps does this route already have?
+
+      // Only recalculate startingSteps if it's a different day or hasn't been set for today yet
+      if progress.startingStepsDate != todayString {
+        // Use dailyContributions[today] for existing steps (most accurate)
+        let thisRouteStepsToday = progress.dailyContributions[todayString] ?? 0
+
+        // Set startingSteps so that (currentSteps - startingSteps) = thisRouteStepsToday
+        // Formula: startingSteps = currentSteps - thisRouteStepsToday
+        progress.startingSteps = currentSteps - thisRouteStepsToday
+        progress.startingStepsDate = todayString
+      }
+      // Note: If startingStepsDate == todayString, we keep the existing startingSteps
+      // This prevents losing steps when setMainRoute is called multiple times in the same day
+
       progress.completedSteps = nil
+
+      // Update the snapshot ONLY if this is a new day or first time being set
+      if progress.selectedDayString != todayString {
+        progress.stepsSoFarOnSelectedDay = currentSteps
+        progress.selectedDayString = todayString
+      }
+
       allRouteProgress[route.id] = progress
     }
 
@@ -169,6 +200,25 @@ class RouteManager {
     let dateString = dateFormatter.string(from: date)
 
     progress.dailyContributions[dateString] = steps
+    allRouteProgress[routeId] = progress
+    saveAllProgress()
+    saveMainRoute()
+  }
+
+  func updateRouteStateForToday(routeId: UUID, currentSteps: Int, todayString: String) {
+    guard var progress = allRouteProgress[routeId] else { return }
+
+    // Get today's contribution (if any) to calculate new startingSteps
+    let todayContribution = progress.dailyContributions[todayString] ?? 0
+
+    // Update the route to treat today as the new "selected day"
+    // startingSteps should be: currentSteps - todayContribution
+    // This way, (currentSteps - startingSteps) = todayContribution
+    progress.startingSteps = currentSteps - todayContribution
+    progress.startingStepsDate = todayString
+    progress.stepsSoFarOnSelectedDay = currentSteps
+    progress.selectedDayString = todayString
+
     allRouteProgress[routeId] = progress
     saveAllProgress()
     saveMainRoute()

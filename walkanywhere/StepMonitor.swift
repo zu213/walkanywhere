@@ -14,7 +14,7 @@ class StepMonitor {
   var todaySteps: Int = 0
   private let healthStore = HKHealthStore()
   private var routeManager: RouteManager
-  private var healthKitManager: HealthKitManager
+  var healthKitManager: HealthKitManager  // Made public for debug access
   private var isMonitoring = false
 
   init(routeManager: RouteManager, healthKitManager: HealthKitManager) {
@@ -31,6 +31,9 @@ class StepMonitor {
 
     // Start monitoring steps
     await fetchTodaySteps()
+
+    // Backfill any missing daily contributions for the main route
+    await backfillMissingDays()
 
     // Set up background query for continuous monitoring
     setupBackgroundStepQuery()
@@ -81,6 +84,96 @@ class StepMonitor {
 
       // Save to today's contributions
       routeManager.updateDailyContribution(for: mainRouteId, date: today, steps: todaySessionSteps)
+    }
+  }
+
+  private func backfillMissingDays() async {
+    // Only backfill if there's an active main route
+    guard let mainRouteId = routeManager.mainRouteId,
+          var progress = routeManager.getProgress(for: mainRouteId),
+          let selectedDayString = progress.selectedDayString,
+          HKHealthStore.isHealthDataAvailable() else { return }
+
+    let stepType = HKQuantityType.quantityType(forIdentifier: .stepCount)!
+    let calendar = Calendar.current
+    let dateFormatter = DateFormatter()
+    dateFormatter.dateFormat = "yyyy-MM-dd"
+
+    // Parse the day this route was MOST RECENTLY set as main
+    guard let selectedDate = dateFormatter.date(from: selectedDayString) else { return }
+    let selectedDayStart = calendar.startOfDay(for: selectedDate)
+    let today = calendar.startOfDay(for: Date())
+    let todayString = dateFormatter.string(from: today)
+
+    // Only backfill from the day it was set as main until today (inclusive)
+    var currentDate = selectedDayStart
+    while currentDate <= today {
+      let dateString = dateFormatter.string(from: currentDate)
+      let startOfDay = calendar.startOfDay(for: currentDate)
+      let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
+
+      // Query HealthKit for this specific day
+      let predicate = HKQuery.predicateForSamples(
+        withStart: startOfDay,
+        end: endOfDay,
+        options: .strictStartDate
+      )
+
+      let result = await withCheckedContinuation { (continuation: CheckedContinuation<Double?, Never>) in
+        let query = HKStatisticsQuery(
+          quantityType: stepType,
+          quantitySamplePredicate: predicate,
+          options: .cumulativeSum
+        ) { _, result, _ in
+          let steps = result?.sumQuantity()?.doubleValue(for: HKUnit.count())
+          continuation.resume(returning: steps)
+        }
+        healthStore.execute(query)
+      }
+
+      if let totalStepsForDay = result {
+        // Calculate what this route should get for this day
+        let contributionForDay: Int
+        if dateString == progress.selectedDayString,
+           let stepsSoFar = progress.stepsSoFarOnSelectedDay {
+          // This is the day the route was selected - only count steps AFTER selection
+          contributionForDay = Int(totalStepsForDay) - stepsSoFar
+        } else {
+          // Check how many steps OTHER routes got on this day
+          let otherRoutesSteps = routeManager.allRouteProgress
+            .filter { $0.key != mainRouteId }
+            .compactMap { $0.value.dailyContributions[dateString] }
+            .reduce(0, +)
+
+          // This route gets: total steps - steps from other routes
+          contributionForDay = max(0, Int(totalStepsForDay) - otherRoutesSteps)
+        }
+
+        // Get existing contribution (if any)
+        let existingContribution = progress.dailyContributions[dateString] ?? 0
+
+        // Only update if HealthKit shows more steps than we have recorded
+        if contributionForDay > existingContribution {
+          routeManager.updateDailyContribution(for: mainRouteId, date: currentDate, steps: contributionForDay)
+        }
+      }
+
+      // Move to next day
+      guard let nextDay = calendar.date(byAdding: .day, value: 1, to: currentDate) else { break }
+      currentDate = nextDay
+    }
+
+    // After backfilling, update the route state to reflect today as the new "truth"
+    // This ensures that if the route was selected days ago, we now treat today as the reference point
+    progress = routeManager.getProgress(for: mainRouteId)! // Refresh after backfill updates
+
+    // Update to today as the new selected day with current steps
+    if progress.selectedDayString != todayString {
+      routeManager.updateRouteStateForToday(
+        routeId: mainRouteId,
+        currentSteps: todaySteps,
+        todayString: todayString
+      )
     }
   }
 

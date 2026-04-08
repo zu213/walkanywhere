@@ -141,3 +141,29 @@ This file contains all user prompts from the development of this project.
 66. "okay now can you delete all the debug you / I added please ?"
 
 67. "Can oyou also remove the debug prints and such please. unless you think they are quite essential."
+
+68. "ah now the daily contributionsa wil lnot correctly update if i say set a main rout ethen do a nbunch of steps then  dont open the app until the next day. if a main route is seelcted and the app is opeend it can be assumed that all steps accounted for when it was last opened anand between now are associated witht hat route. so whena  route is selected you already write down daily contribtuion be it to another route or noen so the rest are to the main route pelase anyou fix this not updating."
+
+69. "Maybe its cause i only just updated but that doesnt seem to work correctly when you set the main route it should note down how many steps had already passe don that day an take it from the totla steps of they dont load gain that day if that makes sense. it just added the total steps to my mainr oute nto accounting for exsiting daily contributions."
+
+70. "can you make this equal todaycontributions only as a fallback as it should be asaved value or soemthing as also nto for today but last opeenedd day as wha tif they had no route selected also my current day steps arent working now :( \"thisRouteExistingStepsToday\""
+
+71. "no instead of \"      let thisRouteStepsToday = progress.dailyContributions[todayString] ?? 0\" can we store a value that is set wehn a main rotue is selected say called \"stepsSoFarOnSelectedDay\" this will let you work out the correct daily contribution next time the app is opened if its a different day as it will be the total minus this. if the route is switched on the same day this will update and not matte. then when they opene the app on a new day all steps in between can be attributed correctly if you get me. if this doesnt exist \"progress.dailyContributions[todayString]\" shoudl be used."
+
+72. "Hi, i am still having probl3mas tracking steps between last app open and a new day as an example i opened the app witha  rotue selected and it has 3100 steps so far for that day i then closed the app and opened today. yesterday i did totla 5,800 steps so 2700 are unaccounted for anad today i have done 357 but it only has assinged 77 this amkes no sense the logic is really borken."
+
+73. "is there anyway to test this without waiting another day ?"
+
+74. "Can you write some tests that run for this use case please ?"
+
+75. "i get compilation errors when running tests"
+
+76. "backfill is a bit overzealous it seems to no longer care for the contributions of other routes on a past day. Additionally, i tried to make it incldue today but it doesnt why have i dont 436 steps today but only 156 are assigned to route 2 (my route)"
+
+77. "can you make the debug clear today contributuons remove it fromt he saved file also ? i is still pulling 156"
+
+78. "This \"let progress = routeManager.getProgress(for: mainRouteId),\" is inaccurtate, start date should be the date it was switched to this includes all dates it was recorded on, additionally even if i change \"results.enumerateStatistics(from: startDate, to: today)\" to today it doesnt backfill todays data which si fien except without it it fills it wrongly. it only needs to run this on first launch of the day but i am fine with it runnign every launch as long as it doesnt backfill time when the route is not set."
+
+79. "backfill is still runnign on days before the current oen was set :( i ge tit running on 04-04 ages ago i told you sto save the current steps and date when soemthing was switched as you do contributiosn, are you doing that cuase this wil lgive you the data you need, working fromt aht backwards when you reopen the app, and you only need to commit daily contributiosn when you switch again in the future (but probs better to do when the app is opeend then you cna udpate htis value again (the switch value))"
+
+80. "The backfill works decently well but it doesnt accoutn for steps done already today as it doesnt add this. can you make it so when you backfill it alsoa ccoutns for today and records them  (the pill doesnt seems to appear for today unless the app has already been opened) and then update the selected day string, steps so faron selected day and all that so this becomes the new truth ?"

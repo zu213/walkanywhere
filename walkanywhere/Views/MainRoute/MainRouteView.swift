@@ -12,6 +12,9 @@ struct MainRouteView: View {
   var routeManager: RouteManager
   var stepMonitor: StepMonitor
   @State private var position: MapCameraPosition = .automatic
+  #if DEBUG
+  @State private var showDebugSheet = false
+  #endif
 
   var body: some View {
     ZStack(alignment: .top) {
@@ -72,10 +75,54 @@ struct MainRouteView: View {
       }
 
       // Glassy navigation title at the top
-      GlassyNavigationTitle(title: "Current Journey")
+      HStack {
+        GlassyNavigationTitle(title: "Current Journey")
+          .padding(.top, 60)
+          .padding(.leading, 20)
+
+        Spacer()
+
+        #if DEBUG
+        Button {
+          showDebugSheet = true
+        } label: {
+          Image(systemName: "hammer.fill")
+            .font(.system(size: 16))
+            .foregroundStyle(.white)
+            .frame(width: 40, height: 40)
+            .background(.ultraThinMaterial)
+            .background(
+              LinearGradient(
+                colors: [.white.opacity(0.3), .white.opacity(0.1)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+              )
+            )
+            .clipShape(Circle())
+            .overlay(
+              Circle()
+                .stroke(
+                  LinearGradient(
+                    colors: [.white.opacity(0.5), .white.opacity(0.2)],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                  ),
+                  lineWidth: 1
+                )
+            )
+            .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 5)
+        }
         .padding(.top, 60)
-        .padding(.leading, 20)
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.trailing, 20)
+        .sheet(isPresented: $showDebugSheet) {
+          DebugTestView(
+            routeManager: routeManager,
+            healthKitManager: stepMonitor.healthKitManager
+          )
+        }
+        #endif
+      }
+      .frame(maxWidth: .infinity, alignment: .leading)
     }
     .ignoresSafeArea()
   }
