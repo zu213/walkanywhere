@@ -6,7 +6,18 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXContainerItemProxy section */
+		C80587482F84F50300384363 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C8A0F7782F60A95A00883602 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C8A0F77F2F60A95A00883602;
+			remoteInfo = walkanywhere;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
+		C80587442F84F50300384363 /* walkanywhereTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = walkanywhereTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C8A0F7802F60A95A00883602 /* walkanywhere.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = walkanywhere.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -21,6 +32,11 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		C80587452F84F50300384363 /* walkanywhereTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = walkanywhereTests;
+			sourceTree = "<group>";
+		};
 		C8A0F7822F60A95A00883602 /* walkanywhere */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -32,6 +48,13 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		C80587412F84F50300384363 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		C8A0F77D2F60A95A00883602 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -46,6 +69,7 @@
 			isa = PBXGroup;
 			children = (
 				C8A0F7822F60A95A00883602 /* walkanywhere */,
+				C80587452F84F50300384363 /* walkanywhereTests */,
 				C8A0F7812F60A95A00883602 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -54,6 +78,7 @@
 			isa = PBXGroup;
 			children = (
 				C8A0F7802F60A95A00883602 /* walkanywhere.app */,
+				C80587442F84F50300384363 /* walkanywhereTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -61,6 +86,29 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		C80587432F84F50300384363 /* walkanywhereTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C805874A2F84F50300384363 /* Build configuration list for PBXNativeTarget "walkanywhereTests" */;
+			buildPhases = (
+				C80587402F84F50300384363 /* Sources */,
+				C80587412F84F50300384363 /* Frameworks */,
+				C80587422F84F50300384363 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C80587492F84F50300384363 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				C80587452F84F50300384363 /* walkanywhereTests */,
+			);
+			name = walkanywhereTests;
+			packageProductDependencies = (
+			);
+			productName = walkanywhereTests;
+			productReference = C80587442F84F50300384363 /* walkanywhereTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		C8A0F77F2F60A95A00883602 /* walkanywhere */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = C8A0F78D2F60A95B00883602 /* Build configuration list for PBXNativeTarget "walkanywhere" */;
@@ -93,6 +141,10 @@
 				LastSwiftUpdateCheck = 2630;
 				LastUpgradeCheck = 2630;
 				TargetAttributes = {
+					C80587432F84F50300384363 = {
+						CreatedOnToolsVersion = 26.3;
+						TestTargetID = C8A0F77F2F60A95A00883602;
+					};
 					C8A0F77F2F60A95A00883602 = {
 						CreatedOnToolsVersion = 26.3;
 					};
@@ -113,11 +165,19 @@
 			projectRoot = "";
 			targets = (
 				C8A0F77F2F60A95A00883602 /* walkanywhere */,
+				C80587432F84F50300384363 /* walkanywhereTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		C80587422F84F50300384363 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		C8A0F77E2F60A95A00883602 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -128,6 +188,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		C80587402F84F50300384363 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		C8A0F77C2F60A95A00883602 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -137,7 +204,57 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		C80587492F84F50300384363 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C8A0F77F2F60A95A00883602 /* walkanywhere */;
+			targetProxy = C80587482F84F50300384363 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		C805874B2F84F50300384363 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = LWFY466XRS;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.zachupstone.walkanywhereTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/walkanywhere.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/walkanywhere";
+			};
+			name = Debug;
+		};
+		C805874C2F84F50300384363 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = LWFY466XRS;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.zachupstone.walkanywhereTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/walkanywhere.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/walkanywhere";
+			};
+			name = Release;
+		};
 		C8A0F78B2F60A95B00883602 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -332,6 +449,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		C805874A2F84F50300384363 /* Build configuration list for PBXNativeTarget "walkanywhereTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C805874B2F84F50300384363 /* Debug */,
+				C805874C2F84F50300384363 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		C8A0F77B2F60A95A00883602 /* Build configuration list for PBXProject "walkanywhere" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
