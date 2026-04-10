@@ -2,10 +2,10 @@
 
 A iOS walking route tracker. Create custom walking routes, track your daily steps along said route, and visualize your progress.
 
-<img src="./images/mainroute.PNG" width="150px" />
-<img src="./images/routes.PNG" width="150px" />
-<img src="./images/mainroute.PNG" width="150px" />
-<img src="./images/steps.PNG" width="150px" />
+|          Main Route         |       Routes Page        |       Create Route Page       |     Receive a push      |
+| :-------------------------: | :----------------------: | :---------------------------: | :---------------------: |
+| ![](./images/mainroute.PNG) | ![](./images/routes.PNG) | ![](./images/createroute.PNG) | ![](./images/steps.PNG) |
+
 
 
 ## Features
